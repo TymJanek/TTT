@@ -4,7 +4,11 @@
 #include <winbase.h>
 
 using namespace std;
+
+//zmiana rozmiaru planszy
+//w przypadku gry z komputerem proszę zostawić 3
 #define N 3
+
 
 /*
  * Do poniższego zadania (gra w kółko i krzyżyk) dodać następujące możliwości:
@@ -15,9 +19,14 @@ using namespace std;
  *    5. Dodać możliwość cofnięcia ruchu.
  */
 
-//TO DO
-//naprawić poziom średni i zrobić trudny
-//dodać cofanie
+
+void copyMatrix(char tab[N][N], char copy[N][N]) {
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            copy[i][j] = tab[i][j];
+        }
+    }
+}
 
 void tabela(char t[N][N]) {
     cout << "   ";
@@ -43,148 +52,162 @@ void tabela(char t[N][N]) {
     cout << endl;
 }
 
-bool pobierz(char t[N][N], int &kto, char character1, char character2, int poziom) {
+bool pobierz(char t[N][N], int &kto, char character1, char character2, int difficultyLevel, int withWho) {
     char poz[N];
 
     cout << endl;
-    if (!(kto % 2)) {
-        cout << "Gracz 1, ";
-        do {
-            cout << "podaj pozycję, którą zaznaczyć (np. a1): " << endl;
-            cin >> poz;
-        } while ((poz[0] < 'a' || poz[0] > 'c') || (poz[1] < '1' || poz[1] > '3'));
-    } else {
-        cout << "Gracz 2: myśli..." << endl;
-        //Sleep(1500);
-        //POZIOM ŁATWY
-        //pełna losowość
-        if (poziom == 1) {
+    char sizeLetter = 97;
+    char sizeNumber = 48;
+    if(withWho == 1){
+        if(!(kto%2))
+            cout<< "Gracz 1-szy, ";
+        else
+            cout<< "Gracz 2-gi,  ";
+        do{
+            cout<<"podaj pozycję, którą zaznaczyć (np. a1): "<<endl;
+            cin>>poz;
+        }while((poz[0]<'a' || poz[0]>(sizeLetter + N-1)) || (poz[1]<'1' || poz[1]>(sizeNumber + N)));
+    }
+    else if(withWho == 2){
+        if (!(kto % 2)) {
+            cout << "Gracz 1, ";
             do {
-                srand(time(NULL));
-                char randNum = (rand() % (52 - 49)) + 49;
-                char randLetter = (rand() % (100 - 97)) + 97;
-                poz[0] = randLetter;
-                poz[1] = randNum;
-            } while (t[poz[1] - '1'][poz[0] - 'a'] != ' ');
-        }
+                cout << "podaj pozycję, którą zaznaczyć (np. a1): " << endl;
+                cin >> poz;
 
-        //POZIOM ŚREDNI
-        //na poziomie średnim komputer blokuje nam środek planszy w przypadku zaznaczenia przez gracza pola na rogu planszy oraz blokuje 2 z 4 dostępnych możliwości na przekątnych
-        //(gdy gracz uzupełni pole a1 oraz b2 komputer zablokuje c3) oraz (gdy gracz uzupełni pole c1 oraz b2 komputer zablokuje a3)
-        else if(poziom == 2){
-            do {
-                if((t[0][0] != ' ' || t[0][2] != ' ' || t[2][0] != ' ' || t[2][2] != ' ') && t[1][1] == ' '){
-                    poz[0] = 'b';
-                    poz[1] = '2';
-                }
-                else if((t[0][0] == character1 && t[1][1] == character1) && t[2][2] == ' '){
-                    poz[0] = 'c';
-                    poz[1] = '3';
-                }
-                else if((t[0][2] == character1 && t[1][1] == character1) && t[2][2] == ' '){
-                    poz[0] = 'a';
-                    poz[1] = '3';
-                }
-                else{
+            } while ((poz[0] < 'a' || poz[0] > 'c') || (poz[1] < '1' || poz[1] > '3'));
+        } else {
+            cout << "Gracz 2: myśli..." << endl;
+            //Sleep(1500);
+            //POZIOM ŁATWY
+            //pełna losowość
+            if (difficultyLevel == 1) {
+                do {
                     srand(time(NULL));
                     char randNum = (rand() % (52 - 49)) + 49;
                     char randLetter = (rand() % (100 - 97)) + 97;
                     poz[0] = randLetter;
                     poz[1] = randNum;
-                }
-            } while (t[poz[1] - '1'][poz[0] - 'a'] != ' ');
-        }
-        //POZIOM TRUDNY
-        // w poziomie trudnym komputer blokuje nasze ruchy na wszystkich przekątnych oraz większości trójek wertykalnie jak i horyzontalnie
-        else{
-            do {
-                if((t[0][0] != ' ' || t[0][2] != ' ' || t[2][0] != ' ' || t[2][2] != ' ') && t[1][1] == ' '){
-                    poz[0] = 'b';
-                    poz[1] = '2';
-                }
-                else if((t[0][0] == character1 && t[1][1] == character1) && t[2][2] == ' '){
-                    poz[0] = 'c';
-                    poz[1] = '3';
-                }
-                else if((t[0][2] == character1 && t[1][1] == character1) && t[2][0] == ' '){
-                    poz[0] = 'a';
-                    poz[1] = '3';
-                }
-                else if((t[2][2] == character1 && t[1][1] == character1) && t[0][0] == ' '){
-                    poz[0] = 'a';
-                    poz[0] = '1';
-                }
-                else if((t[2][0] == character1 && t[1][1] == character1) && t[0][2] == ' '){
-                    poz[0] = 'c';
-                    poz[1] = '1';
-                }
-                else if((t[0][0] == character1 && t[1][0] == character1) && t[2][0] == ' '){
-                    poz[0] = 'a';
-                    poz[1] = '3';
-                }
-                else if((t[0][0] == character1 && t[0][2] == character1) && t[0][1] == ' '){
-                    poz[0] = 'b';
-                    poz[1] = '1';
-                }
-                else if((t[0][2] == character1 && t[2][2] == character1) && t[1][2] == ' '){
-                    poz[0] = 'c';
-                    poz[1] = '2';
-                }
-                else if((t[0][1] == character1 && t[2][1] == character1) && t[1][1] == ' '){
-                    poz[0] = 'b';
-                    poz[1] = '2';
-                }
-                else if((t[0][2] == character1 && t[1][2] == character1) && t[2][2] == ' '){
-                    poz[0] = 'c';
-                    poz[1] = '3';
-                }
-                else if((t[0][1] == character1 && t[0][2] == character1) && t[0][0] == ' '){
-                    poz[0] = 'a';
-                    poz[1] = '1';
-                }
-                else if((t[1][1] == character1 && t[1][2] == character1) && t[1][0] == ' '){
-                    poz[0] = 'a';
-                    poz[1] = '2';
-                }
-                else if((t[1][1] == character1 && t[2][1] == character1) && t[0][1] == ' '){
-                    poz[0] = 'b';
-                    poz[1] = '1';
-                }
-                else if((t[1][0] == character1 && t[1][2] == character1) && t[1][1] == ' '){
-                    poz[0] = 'b';
-                    poz[1] = '2';
-                }
-                else if((t[0][0] == character1 && t[2][0] == character1) && t[1][0] == ' '){
-                    poz[0] = 'a';
-                    poz[1] = '2';
-                }
-                else if((t[0][0] == character1 && t[0][1] == character1) && t[0][2] == ' '){
-                    poz[0] = 'c';
-                    poz[1] = '1';
-                }
+                } while (t[poz[1] - '1'][poz[0] - 'a'] != ' ');
+            }
+                //POZIOM ŚREDNI
+                //na poziomie średnim komputer blokuje nam środek planszy w przypadku zaznaczenia przez gracza pola na rogu planszy oraz blokuje 2 z 4 dostępnych możliwości na przekątnych
+                //(gdy gracz uzupełni pole a1 oraz b2 komputer zablokuje c3) oraz (gdy gracz uzupełni pole c1 oraz b2 komputer zablokuje a3)
+            else if(difficultyLevel == 2){
+                do {
+                    if((t[0][0] != ' ' || t[0][2] != ' ' || t[2][0] != ' ' || t[2][2] != ' ') && t[1][1] == ' '){
+                        poz[0] = 'b';
+                        poz[1] = '2';
+                    }
+                    else if((t[0][0] == character1 && t[1][1] == character1) && t[2][2] == ' '){
+                        poz[0] = 'c';
+                        poz[1] = '3';
+                    }
+                    else if((t[0][2] == character1 && t[1][1] == character1) && t[2][2] == ' '){
+                        poz[0] = 'a';
+                        poz[1] = '3';
+                    }
+                    else{
+                        srand(time(NULL));
+                        char randNum = (rand() % (52 - 49)) + 49;
+                        char randLetter = (rand() % (100 - 97)) + 97;
+                        poz[0] = randLetter;
+                        poz[1] = randNum;
+                    }
+                } while (t[poz[1] - '1'][poz[0] - 'a'] != ' ');
+            }
+                //POZIOM TRUDNY
+                // w poziomie trudnym komputer blokuje nasze ruchy na wszystkich przekątnych oraz większości trójek wertykalnie jak i horyzontalnie
+            else{
+                do {
+                    if((t[0][0] != ' ' || t[0][2] != ' ' || t[2][0] != ' ' || t[2][2] != ' ') && t[1][1] == ' '){
+                        poz[0] = 'b';
+                        poz[1] = '2';
+                    }
+                    else if((t[0][0] == character1 && t[1][1] == character1) && t[2][2] == ' '){
+                        poz[0] = 'c';
+                        poz[1] = '3';
+                    }
+                    else if((t[0][2] == character1 && t[1][1] == character1) && t[2][0] == ' '){
+                        poz[0] = 'a';
+                        poz[1] = '3';
+                    }
+                    else if((t[2][2] == character1 && t[1][1] == character1) && t[0][0] == ' '){
+                        poz[0] = 'a';
+                        poz[0] = '1';
+                    }
+                    else if((t[2][0] == character1 && t[1][1] == character1) && t[0][2] == ' '){
+                        poz[0] = 'c';
+                        poz[1] = '1';
+                    }
+                    else if((t[0][0] == character1 && t[1][0] == character1) && t[2][0] == ' '){
+                        poz[0] = 'a';
+                        poz[1] = '3';
+                    }
+                    else if((t[0][0] == character1 && t[0][2] == character1) && t[0][1] == ' '){
+                        poz[0] = 'b';
+                        poz[1] = '1';
+                    }
+                    else if((t[0][2] == character1 && t[2][2] == character1) && t[1][2] == ' '){
+                        poz[0] = 'c';
+                        poz[1] = '2';
+                    }
+                    else if((t[0][1] == character1 && t[2][1] == character1) && t[1][1] == ' '){
+                        poz[0] = 'b';
+                        poz[1] = '2';
+                    }
+                    else if((t[0][2] == character1 && t[1][2] == character1) && t[2][2] == ' '){
+                        poz[0] = 'c';
+                        poz[1] = '3';
+                    }
+                    else if((t[0][1] == character1 && t[0][2] == character1) && t[0][0] == ' '){
+                        poz[0] = 'a';
+                        poz[1] = '1';
+                    }
+                    else if((t[1][1] == character1 && t[1][2] == character1) && t[1][0] == ' '){
+                        poz[0] = 'a';
+                        poz[1] = '2';
+                    }
+                    else if((t[1][1] == character1 && t[2][1] == character1) && t[0][1] == ' '){
+                        poz[0] = 'b';
+                        poz[1] = '1';
+                    }
+                    else if((t[1][0] == character1 && t[1][2] == character1) && t[1][1] == ' '){
+                        poz[0] = 'b';
+                        poz[1] = '2';
+                    }
+                    else if((t[0][0] == character1 && t[2][0] == character1) && t[1][0] == ' '){
+                        poz[0] = 'a';
+                        poz[1] = '2';
+                    }
+                    else if((t[0][0] == character1 && t[0][1] == character1) && t[0][2] == ' '){
+                        poz[0] = 'c';
+                        poz[1] = '1';
+                    }
 
-                else if(t[1][1] == character1 && (t[0][0] == ' ' || t[0][2] == ' ' || t[2][0] == ' ' || t[2][2] == ' ')) {
-                    srand(time(NULL));
-                    char randNum = (rand() % (52 - 49)) + 49;
-                    char randLetter = (rand() % (100 - 97)) + 97;
-                    poz[0] = randLetter;
-                    poz[1] = randNum;
-                }
-                else{
-                    srand(time(NULL));
-                    char randNum = (rand() % (52 - 49)) + 49;
-                    char randLetter = (rand() % (100 - 97)) + 97;
-                    poz[0] = randLetter;
-                    poz[1] = randNum;
-                }
-            } while (t[poz[1] - '1'][poz[0] - 'a'] != ' ');
+                    else if(t[1][1] == character1 && (t[0][0] == ' ' || t[0][2] == ' ' || t[2][0] == ' ' || t[2][2] == ' ')) {
+                        srand(time(NULL));
+                        char randNum = (rand() % (52 - 49)) + 49;
+                        char randLetter = (rand() % (100 - 97)) + 97;
+                        poz[0] = randLetter;
+                        poz[1] = randNum;
+                    }
+                    else{
+                        srand(time(NULL));
+                        char randNum = (rand() % (52 - 49)) + 49;
+                        char randLetter = (rand() % (100 - 97)) + 97;
+                        poz[0] = randLetter;
+                        poz[1] = randNum;
+                    }
+                } while (t[poz[1] - '1'][poz[0] - 'a'] != ' ');
+            }
         }
     }
 
 
     if (t[poz[1] - '1'][poz[0] - 'a'] != ' ') {
         cout << endl << "Pole " << poz << " było już uzupełnione." << endl;
-        return pobierz(t, kto, character1, character2, poziom);
+        return pobierz(t, kto, character1, character2, difficultyLevel, withWho);
     }
 
     if (!(kto++ % 2))
@@ -254,24 +277,65 @@ bool rozwiazanie(char t[N][N]) {
 int main() {
     char tab[N][N];
     char character1, character2;
+    char copy[N][N];
+    string choice;
     for (int i = 0; i < N; i++) for (int j = 0; j < N; tab[i][j++] = ' ');
-    int kto = 0, poziom = 0;
+    int kto = 0, difficultyLevel = 0, withWho = 0;
     bool koniec = false;
-    cout << "Wybierz poziom trudności: (1 - łatwy, 2 - średni, 3 - trudny)";
-    do {
-        cin >> poziom;
-    } while (poziom < 1 || poziom > 3);
-    cout << "Podaj pierwszy znak wypełniania: ";
-    cin >> character1;
-    do {
-        cout << "Podaj drugi znak wypełniania: ";
-        cin >> character2;
-    } while (character1 == character2);
-    while (!koniec) {
+
+
+    cout << "(1) - Gracz vs Gracz" << endl << "(2) - Gracz vs komputer" << endl;
+    do{
+        cout << "Wybierz tryb rozgrywki:";
+        cin >> withWho;
+    } while (withWho < 1 || withWho > 2);
+
+
+
+    if(withWho == 1){
+        cout << "Podaj pierwszy znak wypełniania: ";
+        cin >> character1;
+        do {
+            cout << "Podaj drugi znak wypełniania: ";
+            cin >> character2;
+        } while (character1 == character2);
+        while (!koniec) {
+            tabela(tab);
+            copyMatrix(tab, copy);
+            pobierz(tab, kto, character1, character2, difficultyLevel, withWho);
+            cout << "Na pewno? Wpisz 'nie' aby cofnąć swój ruch: ";
+            cin >> choice;
+            if(choice == "nie" || choice == "n"){
+                copyMatrix(copy,tab);
+            }
+            else{
+                kto++;
+            }
+            kto++;
+            koniec = rozwiazanie(tab);
+        }
         tabela(tab);
-        pobierz(tab, kto, character1, character2, poziom);
-        koniec = rozwiazanie(tab);
     }
-    tabela(tab);
+    else if(withWho == 2){
+        cout << "Wybierz poziom trudności: (1 - łatwy, 2 - średni, 3 - trudny)";
+        do {
+            cin >> difficultyLevel;
+        } while (difficultyLevel < 1 || difficultyLevel > 3);
+        cout << "Podaj pierwszy znak wypełniania: ";
+        cin >> character1;
+        do {
+            cout << "Podaj drugi znak wypełniania: ";
+            cin >> character2;
+        } while (character1 == character2);
+        while (!koniec) {
+            tabela(tab);
+            pobierz(tab, kto, character1, character2, difficultyLevel, withWho);
+            koniec = rozwiazanie(tab);
+        }
+        tabela(tab);
+    }
+
+
+
     return 0;
 }
