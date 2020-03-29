@@ -21,8 +21,8 @@ using namespace std;
 
 
 void copyMatrix(char tab[N][N], char copy[N][N]) {
-    for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
             copy[i][j] = tab[i][j];
         }
     }
